@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Pemakaian Kendaraan - Fullerton Health</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fefdfc;
+        }
+        /* Custom Properties for Theme Colors */
+        :root {
+            --color-primary: #194e91;
+            --color-primary-hover: #143f7a;
+            --color-secondary: #b68103;
+            --color-secondary-hover: #9d6f02;
+            --color-accent: #d0ad5f;
+            --color-bg-light: #e9d9b0;
+            --color-bg-main: #fefdfc;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            @apply w-full px-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 ease-in-out;
+            focus:ring-color: var(--color-accent);
+            focus:border-color: var(--color-accent);
+        }
+        .btn {
+            @apply px-6 py-2 rounded-lg text-white font-semibold transition-all duration-300 ease-in-out transform hover:scale-105;
+        }
+        .btn-primary {
+            background-color: var(--color-primary);
+        }
+        .btn-primary:hover {
+            background-color: var(--color-primary-hover);
+        }
+        .btn-secondary {
+            background-color: var(--color-secondary);
+        }
+        .btn-secondary:hover {
+            background-color: var(--color-secondary-hover);
+        }
+
+        .table-header {
+            @apply px-4 py-3 text-left text-xs font-medium uppercase tracking-wider;
+            color: var(--color-primary);
+            background-color: rgba(233, 217, 176, 0.3); /* Light version of --color-bg-light */
+        }
+        .table-cell {
+            @apply px-4 py-3 whitespace-nowrap text-sm text-gray-700;
+        }
+        #log-table-body tr {
+            transition: all 0.2s ease-in-out;
+        }
+        #log-table-body tr:hover {
+            @apply shadow-md -translate-y-px;
+            background-color: rgba(208, 173, 95, 0.05);
+        }
+
+        /* Modal Animation */
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        #details-modal.modal-active > div {
+            animation: fadeInScale 0.3s ease-out forwards;
+        }
+        .card {
+            @apply bg-white p-6 rounded-xl shadow-lg transition-all duration-300 ease-in-out hover:shadow-xl;
+        }
+
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <h1 class="text-3xl sm:text-4xl font-bold" style="color: var(--color-primary);">Laporan Pemakaian Kendaraan</h1>
+            <p class="text-md text-gray-500 mt-2">Fullerton Health Clinic - Bali</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Kolom Form Input -->
+            <div class="lg:col-span-1 card">
+                <h2 class="text-2xl font-semibold mb-6 border-b pb-4" style="color: var(--color-primary);">Tambah Laporan Baru</h2>
+                <form id="vehicle-log-form" class="space-y-4">
+                    
+                    <div>
+                        <label for="vehicle" class="block text-sm font-medium text-gray-600 mb-1">Pilih Kendaraan</label>
+                        <select id="vehicle" name="vehicle" class="form-select" required>
+                            <option value="Toyota Hi Ace (Ambulance)">Toyota Hi Ace (Ambulance)</option>
+                            <option value="Daihatsu Terios (Operasional)">Daihatsu Terios (Operasional)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="officer-name" class="block text-sm font-medium text-gray-600 mb-1">Nama Petugas</label>
+                        <input type="text" id="officer-name" name="officer-name" class="form-input" placeholder="Masukkan nama lengkap" required>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="date" class="block text-sm font-medium text-gray-600 mb-1">Tanggal</label>
+                            <input type="date" id="date" name="date" class="form-input" required>
+                        </div>
+                        <div>
+                            <label for="time" class="block text-sm font-medium text-gray-600 mb-1">Waktu</label>
+                            <input type="time" id="time" name="time" class="form-input" required>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="route" class="block text-sm font-medium text-gray-600 mb-1">Rute Perjalanan</label>
+                        <input type="text" id="route" name="route" class="form-input" placeholder="Contoh: Klinik -> RS Sanglah -> Klinik" required>
+                    </div>
+
+                    <div>
+                        <label for="odometer" class="block text-sm font-medium text-gray-600 mb-1">Odometer Akhir</label>
+                        <div class="relative">
+                            <input type="number" id="odometer" name="odometer" class="form-input" placeholder="Contoh: 15023" required>
+                            <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-500">km</span>
+                        </div>
+                    </div>
+
+                    <div class="border-t pt-4">
+                        <h3 class="text-lg font-semibold mb-2" style="color: var(--color-secondary);">Detail Finansial</h3>
+                        <div class="space-y-4">
+                             <div>
+                                <label for="fuel" class="block text-sm font-medium text-gray-600 mb-1">Pembelian BBM (Rp)</label>
+                                <input type="number" id="fuel" name="fuel" class="form-input" placeholder="Isi jika ada pembelian BBM">
+                            </div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Pemakaian e-Money</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <input type="number" id="emoney-usage" name="emoney-usage" class="form-input" placeholder="Nominal (Rp)">
+                                <input type="number" id="emoney-balance" name="emoney-balance" class="form-input" placeholder="Saldo Akhir (Rp)">
+                            </div>
+                            <input type="text" id="emoney-purpose" name="emoney-purpose" class="form-input" placeholder="Keperluan e-Money (Contoh: Tol, Parkir)">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="notes" class="block text-sm font-medium text-gray-600 mb-1">Keterangan Tambahan</label>
+                        <textarea id="notes" name="notes" rows="3" class="form-textarea" placeholder="Contoh: Goresan di bumper, ban perlu diisi angin, dll."></textarea>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="btn btn-primary text-white w-full flex items-center justify-center shadow-lg">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                            Simpan Laporan
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Kolom Tabel Laporan -->
+            <div class="lg:col-span-2 card">
+                <h2 class="text-2xl font-semibold mb-4 border-b pb-4" style="color: var(--color-primary);">Daftar Laporan Pemakaian</h2>
+                
+                <!-- Fitur Download Laporan -->
+                <div id="download-section" class="p-4 rounded-lg mb-4 border" style="background-color: rgba(233, 217, 176, 0.2); border-color: rgba(233, 217, 176, 0.5);">
+                    <h3 class="text-md font-semibold mb-2" style="color: var(--color-secondary);">Download Laporan Excel</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                        <div>
+                            <label for="start-date" class="block text-sm font-medium text-gray-600 mb-1">Tanggal Mulai</label>
+                            <input type="date" id="start-date" name="start-date" class="form-input">
+                        </div>
+                        <div>
+                            <label for="end-date" class="block text-sm font-medium text-gray-600 mb-1">Tanggal Akhir</label>
+                            <input type="date" id="end-date" name="end-date" class="form-input">
+                        </div>
+                        <button id="download-btn" class="btn btn-secondary text-white h-10 flex items-center justify-center shadow-lg">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Download
+                        </button>
+                    </div>
+                </div>
+
+                <div id="auth-info" class="mb-4 text-xs text-gray-500"></div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="table-header">Kendaraan</th>
+                                <th class="table-header">Petugas</th>
+                                <th class="table-header">Waktu</th>
+                                <th class="table-header">Rute</th>
+                                <th class="table-header">Odo.</th>
+                                <th class="table-header">BBM (Rp)</th>
+                                <th class="table-header">e-Money (Rp)</th>
+                                <th class="table-header">Keterangan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="log-table-body" class="bg-white divide-y divide-gray-200">
+                             <tr id="loading-state">
+                                <td colspan="8" class="text-center py-10 text-gray-500">
+                                    <div role="status" class="flex justify-center items-center">
+                                        <svg aria-hidden="true" class="inline w-8 h-8 mr-2 animate-spin" style="color: var(--color-accent);" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#e9d9b0"/>
+                                            <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0492C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor"/>
+                                        </svg>
+                                        <span class="ml-3">Memuat data laporan...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center mt-10 text-sm text-gray-500">
+            <p>&copy; <span id="current-year"></span> Fullerton Health Clinic. Dibuat untuk efisiensi operasional.</p>
+        </footer>
+    </div>
+    
+    <!-- Modal for displaying full details -->
+    <div id="details-modal" class="fixed inset-0 bg-gray-800 bg-opacity-60 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title" style="color: var(--color-primary);">Detail Laporan</h3>
+                <div class="mt-2 px-7 py-3">
+                    <div id="modal-content" class="text-sm text-gray-600 text-left space-y-2"></div>
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button id="close-modal" class="btn btn-primary text-white w-full shadow-lg">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="module">
+        // Import fungsi-fungsi Firebase yang dibutuhkan
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- KONFIGURASI FIREBASE ---
+        const firebaseConfigPlaceholder = {
+            apiKey: "AIzaSyA-3_OG4P_7JqE1fDX5wvcE5es0ATTWpyU",
+            authDomain: "myunit-a3df4.firebaseapp.com",
+            projectId: "myunit-a3df4",
+            storageBucket: "myunit-a3df4.firebasestorage.app",
+            messagingSenderId: "683096555237",
+            appId: "1:683096555237:web:4f99e8f2823f43281b5e0c"
+        };
+        
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : firebaseConfigPlaceholder;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        
+        // Inisialisasi Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // DOM Elements
+        const form = document.getElementById('vehicle-log-form');
+        const logTableBody = document.getElementById('log-table-body');
+        const loadingState = document.getElementById('loading-state');
+        const authInfo = document.getElementById('auth-info');
+        
+        const detailsModal = document.getElementById('details-modal');
+        const modalContent = document.getElementById('modal-content');
+        const modalTitle = document.getElementById('modal-title');
+        const closeModalButton = document.getElementById('close-modal');
+        
+        const downloadBtn = document.getElementById('download-btn');
+        const startDateInput = document.getElementById('start-date');
+        const endDateInput = document.getElementById('end-date');
+
+        // App State
+        let currentUserId = null;
+        let isAuthReady = false;
+        let allLogs = []; 
+
+        // Helper Functions
+        const formatCurrency = (amount) => {
+            if (amount === null || amount === undefined || amount === '') return 'N/A';
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
+        };
+        
+        // Modal Functions
+        const showDetails = (log) => {
+            modalTitle.textContent = `Detail Laporan: ${log.vehicle}`;
+            modalContent.innerHTML = `
+                <p><strong>Nama Petugas:</strong> ${log.officerName || 'Tidak tercatat'}</p>
+                <p><strong>Tanggal:</strong> ${new Date(log.timestamp).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                <p><strong>Waktu:</strong> ${log.time}</p>
+                <p><strong>Rute:</strong> ${log.route}</p>
+                <p><strong>Odometer Akhir:</strong> ${log.odometer.toLocaleString('id-ID')} km</p>
+                <hr class="my-2">
+                <p><strong>Pembelian BBM:</strong> ${formatCurrency(log.fuel)}</p>
+                <p><strong>Pemakaian e-Money:</strong> ${formatCurrency(log.emoneyUsage)}</p>
+                <p><strong>Keperluan e-Money:</strong> ${log.emoneyPurpose || 'Tidak ada'}</p>
+                <p><strong>Saldo Akhir e-Money:</strong> ${formatCurrency(log.emoneyBalance)}</p>
+                <hr class="my-2">
+                <p><strong>Keterangan Tambahan:</strong></p>
+                <p class="whitespace-pre-wrap">${log.notes || 'Tidak ada keterangan.'}</p>
+            `;
+            detailsModal.classList.remove('hidden');
+            detailsModal.classList.add('modal-active');
+        };
+
+        const hideDetails = () => {
+            detailsModal.classList.add('hidden');
+            detailsModal.classList.remove('modal-active');
+        }
+
+        closeModalButton.addEventListener('click', hideDetails);
+        window.addEventListener('click', (event) => {
+            if (event.target === detailsModal) {
+                hideDetails();
+            }
+        });
+
+        // Render Function
+        const renderLogs = (logs) => {
+            logTableBody.innerHTML = ''; 
+            if (logs.length === 0) {
+                logTableBody.innerHTML = `<tr><td colspan="8" class="text-center py-10 text-gray-500">Belum ada laporan yang ditambahkan.</td></tr>`;
+            } else {
+                const sortedLogs = logs.sort((a, b) => b.timestamp - a.timestamp);
+                sortedLogs.forEach(log => {
+                    const row = document.createElement('tr');
+                    row.className = "cursor-pointer";
+                    row.innerHTML = `
+                        <td class="table-cell">
+                            <div class="font-medium">${log.vehicle.split(' ')[0]} ${log.vehicle.split(' ')[1]}</div>
+                            <div class="text-xs text-gray-500">${log.vehicle.split('(')[1].replace(')', '')}</div>
+                        </td>
+                        <td class="table-cell">${log.officerName || '-'}</td>
+                        <td class="table-cell">
+                            <div>${new Date(log.timestamp).toLocaleDateString('id-ID')}</div>
+                            <div class="text-xs text-gray-500">${log.time}</div>
+                        </td>
+                        <td class="table-cell max-w-xs truncate" title="${log.route}">${log.route}</td>
+                        <td class="table-cell">${log.odometer.toLocaleString('id-ID')} km</td>
+                        <td class="table-cell">${formatCurrency(log.fuel)}</td>
+                        <td class="table-cell">${formatCurrency(log.emoneyUsage)}</td>
+                        <td class="table-cell max-w-xs truncate" title="${log.notes}">${log.notes || '-'}</td>
+                    `;
+                    row.addEventListener('click', () => showDetails(log));
+                    logTableBody.appendChild(row);
+                });
+            }
+        };
+
+        // Firestore Functions
+        const fetchLogs = () => {
+             if (!isAuthReady) {
+                console.log("Authentication not ready. Waiting to fetch logs.");
+                return;
+            }
+            const logsCollection = collection(db, `artifacts/${appId}/public/data/vehicle_logs`);
+            
+            onSnapshot(logsCollection, (snapshot) => {
+                const logs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                allLogs = logs;
+                renderLogs(logs);
+                loadingState.style.display = 'none';
+            }, (error) => {
+                console.error("Error fetching logs: ", error);
+                logTableBody.innerHTML = `<tr><td colspan="8" class="text-center py-10 text-red-500">Gagal memuat data. Silakan coba lagi.</td></tr>`;
+            });
+        };
+
+        // Event Listeners
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const logData = {
+                vehicle: form.vehicle.value,
+                officerName: form['officer-name'].value,
+                date: form.date.value,
+                time: form.time.value,
+                route: form.route.value,
+                odometer: parseInt(form.odometer.value),
+                fuel: form.fuel.value ? parseFloat(form.fuel.value) : null,
+                emoneyUsage: form['emoney-usage'].value ? parseFloat(form['emoney-usage'].value) : null,
+                emoneyPurpose: form['emoney-purpose'].value,
+                emoneyBalance: form['emoney-balance'].value ? parseFloat(form['emoney-balance'].value) : null,
+                notes: form.notes.value,
+                timestamp: new Date(form.date.value + 'T' + form.time.value).getTime(),
+                authorId: currentUserId
+            };
+            try {
+                await addDoc(collection(db, `artifacts/${appId}/public/data/vehicle_logs`), logData);
+                form.reset();
+                setDefaultDateTime();
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                alert("Gagal menyimpan laporan. Silakan coba lagi.");
+            }
+        });
+        
+        downloadBtn.addEventListener('click', () => {
+            const startDate = startDateInput.value;
+            const endDate = endDateInput.value;
+
+            if (!startDate || !endDate) {
+                alert("Silakan pilih tanggal mulai dan tanggal akhir.");
+                return;
+            }
+
+            const startTime = new Date(startDate + 'T00:00:00').getTime();
+            const endTime = new Date(endDate + 'T23:59:59').getTime();
+
+            if (startTime > endTime) {
+                alert("Tanggal mulai tidak boleh lebih dari tanggal akhir.");
+                return;
+            }
+
+            const filteredLogs = allLogs.filter(log => log.timestamp >= startTime && log.timestamp <= endTime);
+
+            if (filteredLogs.length === 0) {
+                alert("Tidak ada data laporan pada periode yang dipilih.");
+                return;
+            }
+            
+            filteredLogs.sort((a, b) => a.timestamp - b.timestamp);
+
+            const dataForExcel = filteredLogs.map(log => ({
+                "Tanggal": new Date(log.timestamp).toLocaleDateString('id-ID'),
+                "Waktu": log.time,
+                "Kendaraan": log.vehicle,
+                "Petugas": log.officerName,
+                "Rute Perjalanan": log.route,
+                "Odometer Akhir (km)": log.odometer,
+                "Pembelian BBM (Rp)": log.fuel,
+                "Pemakaian e-Money (Rp)": log.emoneyUsage,
+                "Keperluan e-Money": log.emoneyPurpose,
+                "Saldo Akhir e-Money (Rp)": log.emoneyBalance,
+                "Keterangan": log.notes
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan Kendaraan");
+            
+            worksheet['!cols'] = [
+                { wch: 12 }, { wch: 8 }, { wch: 25 }, { wch: 20 }, { wch: 40 },
+                { wch: 20 }, { wch: 20 }, { wch: 22 }, { wch: 25 }, { wch: 25 }, { wch: 50 }
+            ];
+
+            const filename = `Laporan_Kendaraan_${startDate}_to_${endDate}.xlsx`;
+            XLSX.writeFile(workbook, filename);
+        });
+
+        // Initialization
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserId = user.uid;
+                authInfo.textContent = `User ID: ${currentUserId}`;
+            } else {
+                 try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                         await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                         await signInAnonymously(auth);
+                    }
+                 } catch (error) {
+                    console.error("Authentication failed:", error);
+                    authInfo.textContent = 'Authentication Gagal. Data mungkin tidak tersimpan.';
+                 }
+            }
+             isAuthReady = true;
+             fetchLogs(); 
+        });
+
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        
+        const setDefaultDateTime = () => {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const day = now.getDate().toString().padStart(2, '0');
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            
+            document.getElementById('date').value = `${year}-${month}-${day}`;
+            document.getElementById('time').value = `${hours}:${minutes}`;
+
+            const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            const yearFirst = firstDayOfMonth.getFullYear();
+            const monthFirst = (firstDayOfMonth.getMonth() + 1).toString().padStart(2, '0');
+            const dayFirst = firstDayOfMonth.getDate().toString().padStart(2, '0');
+
+            document.getElementById('start-date').value = `${yearFirst}-${monthFirst}-${dayFirst}`;
+            document.getElementById('end-date').value = `${year}-${month}-${day}`;
+        };
+
+        setDefaultDateTime();
+    </script>
+</body>
+</html>
+
+
+
