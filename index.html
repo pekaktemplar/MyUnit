@@ -44,22 +44,6 @@
             background-color: var(--color-secondary-hover);
         }
 
-        .table-header {
-            @apply px-4 py-3 text-left text-xs font-medium uppercase tracking-wider;
-            color: var(--color-primary);
-            background-color: rgba(233, 217, 176, 0.3); /* Light version of --color-bg-light */
-        }
-        .table-cell {
-            @apply px-4 py-3 whitespace-nowrap text-sm text-gray-700;
-        }
-        #log-table-body tr {
-            transition: all 0.2s ease-in-out;
-        }
-        #log-table-body tr:hover {
-            @apply shadow-md -translate-y-px;
-            background-color: rgba(208, 173, 95, 0.05);
-        }
-
         /* Modal Animation */
         @keyframes fadeInScale {
             from {
@@ -142,10 +126,7 @@
                                 <input type="number" id="fuel" name="fuel" class="form-input" placeholder="Isi jika ada pembelian BBM">
                             </div>
                             <label class="block text-sm font-medium text-gray-600 mb-1">Pemakaian e-Money</label>
-                            <div class="grid grid-cols-2 gap-4">
-                                <input type="number" id="emoney-usage" name="emoney-usage" class="form-input" placeholder="Nominal (Rp)">
-                                <input type="number" id="emoney-balance" name="emoney-balance" class="form-input" placeholder="Saldo Akhir (Rp)">
-                            </div>
+                            <input type="number" id="emoney-usage" name="emoney-usage" class="form-input" placeholder="Nominal (Rp)">
                             <input type="text" id="emoney-purpose" name="emoney-purpose" class="form-input" placeholder="Keperluan e-Money (Contoh: Tol, Parkir)">
                         </div>
                     </div>
@@ -164,11 +145,10 @@
                 </form>
             </div>
 
-            <!-- Kolom Tabel Laporan -->
+            <!-- Kolom Laporan -->
             <div class="lg:col-span-2 card">
                 <h2 class="text-2xl font-semibold mb-4 border-b pb-4" style="color: var(--color-primary);">Daftar Laporan Pemakaian</h2>
                 
-                <!-- Fitur Download Laporan -->
                 <div id="download-section" class="p-4 rounded-lg mb-4 border" style="background-color: rgba(233, 217, 176, 0.2); border-color: rgba(233, 217, 176, 0.5);">
                     <h3 class="text-md font-semibold mb-2" style="color: var(--color-secondary);">Download Laporan Excel</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
@@ -188,34 +168,32 @@
                 </div>
 
                 <div id="auth-info" class="mb-4 text-xs text-gray-500"></div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="table-header">Kendaraan</th>
-                                <th class="table-header">Petugas</th>
-                                <th class="table-header">Waktu</th>
-                                <th class="table-header">Rute</th>
-                                <th class="table-header">Odo.</th>
-                                <th class="table-header">BBM (Rp)</th>
-                                <th class="table-header">e-Money (Rp)</th>
-                                <th class="table-header">Keterangan</th>
-                            </tr>
-                        </thead>
-                        <tbody id="log-table-body" class="bg-white divide-y divide-gray-200">
-                             <tr id="loading-state">
-                                <td colspan="8" class="text-center py-10 text-gray-500">
-                                    <div role="status" class="flex justify-center items-center">
-                                        <svg aria-hidden="true" class="inline w-8 h-8 mr-2 animate-spin" style="color: var(--color-accent);" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#e9d9b0"/>
-                                            <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0492C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor"/>
-                                        </svg>
-                                        <span class="ml-3">Memuat data laporan...</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+
+                <!-- Responsive Log Display Area -->
+                <div>
+                    <!-- Desktop Table Header (Hidden on Mobile) -->
+                    <div class="hidden lg:grid lg:grid-cols-8 gap-4 px-4 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color: var(--color-primary); background-color: rgba(233, 217, 176, 0.3);">
+                        <div class="col-span-2">Kendaraan</div>
+                        <div>Petugas</div>
+                        <div class="col-span-2">Waktu</div>
+                        <div>Odo.</div>
+                        <div>BBM</div>
+                        <div>Ket.</div>
+                    </div>
+
+                    <!-- Log List (changes layout based on screen size) -->
+                    <div id="log-list" class="space-y-4 lg:space-y-0">
+                        <!-- Loading State -->
+                         <div id="loading-state" class="text-center py-10 text-gray-500">
+                            <div role="status" class="flex justify-center items-center">
+                                <svg aria-hidden="true" class="inline w-8 h-8 mr-2 animate-spin" style="color: var(--color-accent);" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#e9d9b0"/>
+                                    <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0492C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor"/>
+                                </svg>
+                                <span class="ml-3">Memuat data laporan...</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -270,7 +248,7 @@
 
         // DOM Elements
         const form = document.getElementById('vehicle-log-form');
-        const logTableBody = document.getElementById('log-table-body');
+        const logListContainer = document.getElementById('log-list');
         const loadingState = document.getElementById('loading-state');
         const authInfo = document.getElementById('auth-info');
         
@@ -290,7 +268,7 @@
 
         // Helper Functions
         const formatCurrency = (amount) => {
-            if (amount === null || amount === undefined || amount === '') return 'N/A';
+            if (amount === null || amount === undefined || amount === '' || isNaN(amount)) return 'N/A';
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
         };
         
@@ -307,7 +285,6 @@
                 <p><strong>Pembelian BBM:</strong> ${formatCurrency(log.fuel)}</p>
                 <p><strong>Pemakaian e-Money:</strong> ${formatCurrency(log.emoneyUsage)}</p>
                 <p><strong>Keperluan e-Money:</strong> ${log.emoneyPurpose || 'Tidak ada'}</p>
-                <p><strong>Saldo Akhir e-Money:</strong> ${formatCurrency(log.emoneyBalance)}</p>
                 <hr class="my-2">
                 <p><strong>Keterangan Tambahan:</strong></p>
                 <p class="whitespace-pre-wrap">${log.notes || 'Tidak ada keterangan.'}</p>
@@ -328,34 +305,57 @@
             }
         });
 
-        // Render Function
+        // Render Function for Responsive List
         const renderLogs = (logs) => {
-            logTableBody.innerHTML = ''; 
+            logListContainer.innerHTML = ''; 
             if (logs.length === 0) {
-                logTableBody.innerHTML = `<tr><td colspan="8" class="text-center py-10 text-gray-500">Belum ada laporan yang ditambahkan.</td></tr>`;
+                logListContainer.innerHTML = `<div class="text-center py-10 text-gray-500">Belum ada laporan yang ditambahkan.</div>`;
             } else {
                 const sortedLogs = logs.sort((a, b) => b.timestamp - a.timestamp);
                 sortedLogs.forEach(log => {
-                    const row = document.createElement('tr');
-                    row.className = "cursor-pointer";
-                    row.innerHTML = `
-                        <td class="table-cell">
-                            <div class="font-medium">${log.vehicle.split(' ')[0]} ${log.vehicle.split(' ')[1]}</div>
-                            <div class="text-xs text-gray-500">${log.vehicle.split('(')[1].replace(')', '')}</div>
-                        </td>
-                        <td class="table-cell">${log.officerName || '-'}</td>
-                        <td class="table-cell">
+                    const logEntry = document.createElement('div');
+                    logEntry.className = "lg:grid lg:grid-cols-8 lg:gap-4 lg:items-center p-4 lg:p-0 lg:py-3 border rounded-lg lg:border-0 lg:border-b lg:rounded-none cursor-pointer transition-all duration-200 ease-in-out hover:bg-gray-50 hover:shadow-md lg:hover:shadow-none";
+                    
+                    const vehicleName = log.vehicle.split(' (')[0];
+                    const vehicleType = log.vehicle.split(' (')[1].replace(')','');
+
+                    logEntry.innerHTML = `
+                        <!-- Mobile View: Flexbox Column -->
+                        <div class="flex flex-col lg:hidden text-sm">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <p class="font-bold text-base" style="color: var(--color-primary);">${vehicleName}</p>
+                                    <p class="text-xs text-gray-500">${vehicleType}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-semibold">${new Date(log.timestamp).toLocaleDateString('id-ID')}</p>
+                                    <p class="text-xs text-gray-500">${log.time}</p>
+                                </div>
+                            </div>
+                            <hr class="my-2">
+                            <p><span class="font-semibold w-24 inline-block">Petugas:</span> ${log.officerName || '-'}</p>
+                            <p><span class="font-semibold w-24 inline-block">Rute:</span> ${log.route}</p>
+                            <p><span class="font-semibold w-24 inline-block">Odometer:</span> ${log.odometer.toLocaleString('id-ID')} km</p>
+                            <p><span class="font-semibold w-24 inline-block">BBM:</span> ${formatCurrency(log.fuel)}</p>
+                             <p class="mt-2 text-gray-500 text-xs truncate">Ket: ${log.notes || '-'}</p>
+                        </div>
+
+                        <!-- Desktop View: Grid Columns -->
+                        <div class="hidden lg:table-cell col-span-2 px-4 whitespace-nowrap text-sm text-gray-700">
+                             <div class="font-medium text-gray-900">${vehicleName}</div>
+                             <div class="text-xs text-gray-500">${vehicleType}</div>
+                        </div>
+                        <div class="hidden lg:table-cell px-4 whitespace-nowrap text-sm text-gray-700">${log.officerName || '-'}</div>
+                        <div class="hidden lg:table-cell col-span-2 px-4 whitespace-nowrap text-sm text-gray-700">
                             <div>${new Date(log.timestamp).toLocaleDateString('id-ID')}</div>
                             <div class="text-xs text-gray-500">${log.time}</div>
-                        </td>
-                        <td class="table-cell max-w-xs truncate" title="${log.route}">${log.route}</td>
-                        <td class="table-cell">${log.odometer.toLocaleString('id-ID')} km</td>
-                        <td class="table-cell">${formatCurrency(log.fuel)}</td>
-                        <td class="table-cell">${formatCurrency(log.emoneyUsage)}</td>
-                        <td class="table-cell max-w-xs truncate" title="${log.notes}">${log.notes || '-'}</td>
+                        </div>
+                        <div class="hidden lg:table-cell px-4 whitespace-nowrap text-sm text-gray-700">${log.odometer.toLocaleString('id-ID')} km</div>
+                        <div class="hidden lg:table-cell px-4 whitespace-nowrap text-sm text-gray-700">${formatCurrency(log.fuel)}</div>
+                        <div class="hidden lg:table-cell px-4 whitespace-nowrap text-sm text-gray-700 truncate" title="${log.notes}">${log.notes || '-'}</div>
                     `;
-                    row.addEventListener('click', () => showDetails(log));
-                    logTableBody.appendChild(row);
+                    logEntry.addEventListener('click', () => showDetails(log));
+                    logListContainer.appendChild(logEntry);
                 });
             }
         };
@@ -366,6 +366,7 @@
                 console.log("Authentication not ready. Waiting to fetch logs.");
                 return;
             }
+            loadingState.style.display = 'flex';
             const logsCollection = collection(db, `artifacts/${appId}/public/data/vehicle_logs`);
             
             onSnapshot(logsCollection, (snapshot) => {
@@ -375,7 +376,7 @@
                 loadingState.style.display = 'none';
             }, (error) => {
                 console.error("Error fetching logs: ", error);
-                logTableBody.innerHTML = `<tr><td colspan="8" class="text-center py-10 text-red-500">Gagal memuat data. Silakan coba lagi.</td></tr>`;
+                logListContainer.innerHTML = `<div class="text-center py-10 text-red-500">Gagal memuat data. Silakan coba lagi.</div>`;
             });
         };
 
@@ -392,7 +393,6 @@
                 fuel: form.fuel.value ? parseFloat(form.fuel.value) : null,
                 emoneyUsage: form['emoney-usage'].value ? parseFloat(form['emoney-usage'].value) : null,
                 emoneyPurpose: form['emoney-purpose'].value,
-                emoneyBalance: form['emoney-balance'].value ? parseFloat(form['emoney-balance'].value) : null,
                 notes: form.notes.value,
                 timestamp: new Date(form.date.value + 'T' + form.time.value).getTime(),
                 authorId: currentUserId
@@ -443,7 +443,6 @@
                 "Pembelian BBM (Rp)": log.fuel,
                 "Pemakaian e-Money (Rp)": log.emoneyUsage,
                 "Keperluan e-Money": log.emoneyPurpose,
-                "Saldo Akhir e-Money (Rp)": log.emoneyBalance,
                 "Keterangan": log.notes
             }));
 
@@ -453,7 +452,7 @@
             
             worksheet['!cols'] = [
                 { wch: 12 }, { wch: 8 }, { wch: 25 }, { wch: 20 }, { wch: 40 },
-                { wch: 20 }, { wch: 20 }, { wch: 22 }, { wch: 25 }, { wch: 25 }, { wch: 50 }
+                { wch: 20 }, { wch: 20 }, { wch: 22 }, { wch: 25 }, { wch: 50 }
             ];
 
             const filename = `Laporan_Kendaraan_${startDate}_to_${endDate}.xlsx`;
@@ -507,6 +506,5 @@
     </script>
 </body>
 </html>
-
 
 
